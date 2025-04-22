@@ -20,9 +20,13 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-            RoleAndPermissionSeeder::class,
+            RoleSeeder::class,
             FacultyDepartmentSeeder::class,
             AdminUserSeeder::class,
+            StandardSeeder::class,
+            DocumentSeeder::class,
+            AuditSeeder::class,
+            SurveySeeder::class,
         ]);
     }
 }
