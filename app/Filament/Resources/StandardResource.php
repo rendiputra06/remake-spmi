@@ -63,16 +63,7 @@ class StandardResource extends Resource
                             ->label('Aktif')
                             ->default(true),
                     ])->columns(2),
-            ])
-            ->beforeSave(function ($data, $record) {
-                if (!$record) {
-                    $data['created_by'] = Auth::id();
-                }
-
-                $data['updated_by'] = Auth::id();
-
-                return $data;
-            });
+            ]);
     }
 
     public static function table(Table $table): Table

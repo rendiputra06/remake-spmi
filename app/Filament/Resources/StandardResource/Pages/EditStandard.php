@@ -5,6 +5,7 @@ namespace App\Filament\Resources\StandardResource\Pages;
 use App\Filament\Resources\StandardResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 
 class EditStandard extends EditRecord
 {
@@ -15,5 +16,12 @@ class EditStandard extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['updated_by'] = Auth::id();
+
+        return $data;
     }
 }

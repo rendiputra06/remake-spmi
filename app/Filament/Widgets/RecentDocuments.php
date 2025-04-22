@@ -71,7 +71,7 @@ class RecentDocuments extends BaseWidget
                 Tables\Actions\Action::make('download')
                     ->label('Unduh')
                     ->icon('heroicon-m-arrow-down-tray')
-                    ->url(fn(Document $record): string => route('filament.admin.resources.documents.index'))
+                    ->url(fn(Document $record): string => \Illuminate\Support\Facades\Storage::url($record->file_path))
                     ->openUrlInNewTab(),
             ]);
     }

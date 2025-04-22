@@ -47,7 +47,7 @@ class LatestAudits extends BaseWidget
                     ->sortable(),
                 Tables\Columns\TextColumn::make('audit_findings_count')
                     ->label('Temuan')
-                    ->counts('auditFindings')
+                    ->counts('findings')
                     ->sortable(),
             ])
             ->actions([

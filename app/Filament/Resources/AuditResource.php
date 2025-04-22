@@ -106,16 +106,7 @@ class AuditResource extends Resource
                             ->multiple()
                             ->searchable(),
                     ])->columns(2),
-            ])
-            ->beforeSave(function ($data, $record) {
-                if (!$record) {
-                    $data['created_by'] = Auth::id();
-                }
-
-                $data['updated_by'] = Auth::id();
-
-                return $data;
-            });
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -235,6 +226,7 @@ class AuditResource extends Resource
         return [
             'index' => Pages\ListAudits::route('/'),
             'create' => Pages\CreateAudit::route('/create'),
+            'view' => Pages\ViewAudit::route('/{record}'),
             'edit' => Pages\EditAudit::route('/{record}/edit'),
         ];
     }

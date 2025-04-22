@@ -77,14 +77,7 @@ class FindingsRelationManager extends RelationManager
                 Forms\Components\DatePicker::make('response_date')
                     ->label('Tanggal Respon')
                     ->visible(fn(string $operation): bool => $operation === 'edit'),
-            ])
-            ->beforeSave(function ($data, $record) {
-                if (!$record) {
-                    $data['created_by'] = Auth::id();
-                }
-
-                return $data;
-            });
+            ]);
     }
 
     public function table(Table $table): Table
@@ -167,7 +160,11 @@ class FindingsRelationManager extends RelationManager
                     ->relationship('standard', 'name'),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->mutateFormDataBeforeCreate(function (array $data): array {
+                        $data['created_by'] = auth()->id();
+                        return $data;
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

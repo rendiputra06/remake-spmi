@@ -108,26 +108,7 @@ class DocumentResource extends Resource
                             ->searchable()
                             ->preload(),
                     ])->columns(2),
-            ])
-            ->beforeSave(function ($data, $record) {
-                if (!$record) {
-                    $data['uploaded_by'] = Auth::id();
-
-                    if (isset($data['file_path'])) {
-                        $fileName = pathinfo($data['file_path'], PATHINFO_BASENAME);
-                        $fileType = Storage::mimeType($data['file_path']);
-                        $fileSize = Storage::size($data['file_path']);
-
-                        $data['file_name'] = $fileName;
-                        $data['file_type'] = $fileType;
-                        $data['file_size'] = self::formatBytes($fileSize);
-                    }
-                }
-
-                $data['updated_by'] = Auth::id();
-
-                return $data;
-            });
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -232,6 +213,7 @@ class DocumentResource extends Resource
         return [
             'index' => Pages\ListDocuments::route('/'),
             'create' => Pages\CreateDocument::route('/create'),
+            'view' => Pages\ViewDocument::route('/{record}'),
             'edit' => Pages\EditDocument::route('/{record}/edit'),
         ];
     }
