@@ -13,14 +13,7 @@ class SurveyAnswer extends Model
     protected $fillable = [
         'survey_response_id',
         'survey_question_id',
-        'answer_text',
-        'answer_number',
-        'answer_options',
-    ];
-
-    protected $casts = [
-        'answer_number' => 'integer',
-        'answer_options' => 'array',
+        'answer',
     ];
 
     /**

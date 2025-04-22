@@ -46,6 +46,34 @@ class ViewSurvey extends ViewRecord
                     $this->notification()->success()->title('Survey berhasil ditutup')->send();
                     $this->redirect($this->getResource()::getUrl('view', ['record' => $this->record]));
                 }),
+            Actions\Action::make('publicUrl')
+                ->label('URL Publik')
+                ->color('primary')
+                ->icon('heroicon-o-link')
+                ->visible(fn($record) => $record->status === 'active' && $record->visibility === 'public')
+                ->url(fn($record) => route('surveys.show', $record))
+                ->openUrlInNewTab(),
+            Actions\Action::make('analytics')
+                ->label('Analisis Hasil')
+                ->color('warning')
+                ->icon('heroicon-o-chart-bar')
+                ->visible(fn($record) => $record->responses()->exists())
+                ->url(fn($record) => route('survey-analytics.show', $record))
+                ->openUrlInNewTab(),
+            Actions\Action::make('downloadExcel')
+                ->label('Download Excel')
+                ->color('success')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->visible(fn($record) => $record->responses()->exists())
+                ->url(fn($record) => route('survey-analytics.export-excel', $record))
+                ->openUrlInNewTab(),
+            Actions\Action::make('downloadPdf')
+                ->label('Download PDF')
+                ->color('danger')
+                ->icon('heroicon-o-document-text')
+                ->visible(fn($record) => $record->responses()->exists())
+                ->url(fn($record) => route('survey-analytics.export-pdf', $record))
+                ->openUrlInNewTab(),
         ];
     }
 

@@ -52,6 +52,15 @@ class SurveyResource extends Resource
                             ])
                             ->default('draft')
                             ->required(),
+                        Forms\Components\Select::make('visibility')
+                            ->label('Visibilitas')
+                            ->options([
+                                'public' => 'Publik - Dapat diakses semua orang',
+                                'private' => 'Privat - Hanya dapat diakses oleh pembuat',
+                                'restricted' => 'Terbatas - Hanya dapat diakses pengguna tertentu',
+                            ])
+                            ->default('public')
+                            ->required(),
                         Forms\Components\DateTimePicker::make('start_date')
                             ->label('Tanggal Mulai')
                             ->seconds(false),
@@ -130,6 +139,16 @@ class SurveyResource extends Resource
                         'active' => 'success',
                         'closed' => 'danger',
                     }),
+                Tables\Columns\TextColumn::make('visibility')
+                    ->label('Visibilitas')
+                    ->badge()
+                    ->sortable()
+                    ->color(fn(string $state): string => match ($state) {
+                        'public' => 'success',
+                        'private' => 'danger',
+                        'restricted' => 'warning',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Tanggal Mulai')
                     ->dateTime('d M Y H:i')
@@ -191,7 +210,7 @@ class SurveyResource extends Resource
                         ->label('Download Hasil')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->color('success')
-                        ->url(fn(Survey $record) => route('filament.admin.resources.surveys.index'))
+                        ->url(fn(Survey $record) => route('survey-analytics.export-excel', $record))
                         ->visible(fn(Survey $record) => $record->responses()->exists()),
                 ]),
             ])
@@ -220,6 +239,15 @@ class SurveyResource extends Resource
                                 'draft' => 'gray',
                                 'active' => 'success',
                                 'closed' => 'danger',
+                            }),
+                        Infolists\Components\TextEntry::make('visibility')
+                            ->label('Visibilitas')
+                            ->badge()
+                            ->color(fn(string $state): string => match ($state) {
+                                'public' => 'success',
+                                'private' => 'danger',
+                                'restricted' => 'warning',
+                                default => 'gray',
                             }),
                         Infolists\Components\TextEntry::make('is_anonymous')
                             ->label('Anonim')

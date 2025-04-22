@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->enum('status', ['draft', 'active', 'closed'])->default('draft');
+            $table->string('visibility')->default('public'); // public, private, restricted
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
             $table->string('target_audience')->nullable(); // mahasiswa, dosen, tenaga kependidikan, alumni, dll

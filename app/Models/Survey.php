@@ -15,6 +15,7 @@ class Survey extends Model
         'title',
         'description',
         'status',
+        'visibility',
         'start_date',
         'end_date',
         'target_audience',
