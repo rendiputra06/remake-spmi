@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- jika ada perubahaan atau penambahaan pada table database lakukan langsung pada file migrasi utama, karena akan selalu melakukan migrate fresh
+- jika ada perubahaan pada file migrasi, lakukan juga perubahaan pada file seeder nya juga  yang berhubungan dengan file migrasi tersebut- 
