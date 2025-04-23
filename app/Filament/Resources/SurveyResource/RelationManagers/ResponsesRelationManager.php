@@ -40,6 +40,11 @@ class ResponsesRelationManager extends RelationManager
                         Infolists\Components\TextEntry::make('ip_address')
                             ->label('Alamat IP')
                             ->visible(fn($record) => $record->ip_address !== null),
+                        Infolists\Components\TextEntry::make('user_agent')
+                            ->label('User Agent')
+                            ->visible(fn($record) => $record->user_agent !== null)
+                            ->limit(50)
+                            ->tooltip(fn($record) => $record->user_agent),
                     ])
                     ->columns(2),
                 Infolists\Components\Section::make('Jawaban')
@@ -51,39 +56,56 @@ class ResponsesRelationManager extends RelationManager
                                     ->label('Pertanyaan')
                                     ->weight('bold')
                                     ->columnSpanFull(),
-                                Infolists\Components\TextEntry::make('answer_text')
-                                    ->label('Jawaban Teks')
-                                    ->visible(fn($record) => $record->question->type === 'text' && $record->answer_text !== null),
-                                Infolists\Components\TextEntry::make('answer_number')
-                                    ->label('Jawaban Angka')
-                                    ->visible(fn($record) => $record->question->type === 'number' && $record->answer_number !== null),
                                 Infolists\Components\TextEntry::make('formatted_answer')
                                     ->label('Jawaban')
                                     ->state(function ($record) {
-                                        // Jika tipe pertanyaan adalah scale
-                                        if ($record->question->type === 'scale' && $record->answer_number !== null) {
-                                            return "Nilai: {$record->answer_number} (dari {$record->question->min_value} sampai {$record->question->max_value})";
+                                        // Jika tidak ada jawaban
+                                        if ($record->answer === null) {
+                                            return 'Tidak ada jawaban';
                                         }
 
-                                        // Jika tipe pertanyaan adalah multiple_choice atau dropdown
-                                        if (in_array($record->question->type, ['multiple_choice', 'dropdown']) && $record->answer_options !== null) {
-                                            $options = json_decode($record->answer_options, true);
-                                            if (is_array($options) && count($options) === 1) {
-                                                return $options[0];
-                                            }
-                                        }
-
-                                        // Jika tipe pertanyaan adalah checkbox
-                                        if ($record->question->type === 'checkbox' && $record->answer_options !== null) {
-                                            $options = json_decode($record->answer_options, true);
-                                            if (is_array($options) && count($options) > 0) {
+                                        // Tampilkan jawaban berdasarkan tipe
+                                        if ($record->answer_type === 'array' || $record->answer_type === 'json') {
+                                            $options = json_decode($record->answer, true);
+                                            if (is_array($options)) {
                                                 return implode(', ', $options);
                                             }
                                         }
 
-                                        return 'Tidak ada jawaban';
+                                        // Jika tipe adalah scale, tambahkan informasi skala
+                                        if ($record->question->type === 'scale' && $record->answer_type === 'integer') {
+                                            return "Nilai: {$record->answer} (dari {$record->question->min_value} sampai {$record->question->max_value})";
+                                        }
+
+                                        // Default, tampilkan answer apa adanya
+                                        return $record->answer;
+                                    }),
+                                Infolists\Components\TextEntry::make('question.type')
+                                    ->label('Tipe Pertanyaan')
+                                    ->badge()
+                                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                                        'text' => 'Teks',
+                                        'textarea' => 'Teks Panjang',
+                                        'number' => 'Angka',
+                                        'email' => 'Email',
+                                        'date' => 'Tanggal',
+                                        'multiple_choice' => 'Pilihan Ganda',
+                                        'checkbox' => 'Kotak Centang',
+                                        'dropdown' => 'Dropdown',
+                                        'scale' => 'Skala',
+                                        default => $state,
                                     })
-                                    ->visible(fn($record) => in_array($record->question->type, ['scale', 'multiple_choice', 'checkbox', 'dropdown'])),
+                                    ->color(fn(string $state): string => match ($state) {
+                                        'text', 'textarea' => 'info',
+                                        'number', 'scale' => 'success',
+                                        'multiple_choice', 'checkbox', 'dropdown' => 'warning',
+                                        default => 'gray',
+                                    }),
+                                Infolists\Components\TextEntry::make('answer_type')
+                                    ->label('Tipe Jawaban')
+                                    ->badge()
+                                    ->color('gray')
+                                    ->formatStateUsing(fn($state) => $state ?: 'tidak ada'),
                             ])
                             ->columnSpanFull(),
                     ]),

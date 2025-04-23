@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+dalam melakukan pembuatan atau perbaikan sebuah fitur, buatkan file md yang berisikan task list yang di lakukan, berikan tanda jika kamu berhasil menyelesaikan task tersebut, simpan file tersebut folder notes, file akan berfungsi juga sebagai riyawat permitaan dan apa saja task list yang kamu buatkan pada permintaan tersebut, di awal file berikan nama, tgl jam eksekusi, dan prompt nya sebagai atribut, sebagai nama file gunakan nomor urutan dan tanggal

@@ -92,6 +92,7 @@ class SurveyController extends Controller
             foreach ($questions as $question) {
                 if (isset($request->answers[$question->id])) {
                     $answer = $request->answers[$question->id];
+                    $answerType = $this->determineAnswerType($question->type, $answer);
 
                     // Konversi array menjadi string jika jawaban berupa multiple choice
                     if (is_array($answer)) {
@@ -100,7 +101,8 @@ class SurveyController extends Controller
 
                     $response->answers()->create([
                         'survey_question_id' => $question->id,
-                        'answer' => $answer
+                        'answer' => $answer,
+                        'answer_type' => $answerType
                     ]);
                 }
             }
@@ -115,6 +117,21 @@ class SurveyController extends Controller
                 ->with('error', 'Terjadi kesalahan saat menyimpan jawaban. Silakan coba lagi.')
                 ->withInput();
         }
+    }
+
+    /**
+     * Menentukan tipe jawaban berdasarkan tipe pertanyaan
+     */
+    private function determineAnswerType(string $questionType, $answer): string
+    {
+        return match ($questionType) {
+            'number' => 'integer',
+            'scale' => 'integer',
+            'checkbox' => 'array',
+            'multiple_choice', 'dropdown' => is_array($answer) ? 'array' : 'string',
+            'text', 'textarea', 'email', 'date' => 'string',
+            default => 'string',
+        };
     }
 
     /**

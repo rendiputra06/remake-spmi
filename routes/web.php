@@ -27,3 +27,11 @@ Route::get('/surveys/{id}/thank-you', [App\Http\Controllers\SurveyController::cl
 Route::get('survey-analytics/{id}', [App\Http\Controllers\SurveyAnalyticsController::class, 'show'])->name('survey-analytics.show');
 Route::get('survey-analytics/{id}/export-excel', [App\Http\Controllers\SurveyAnalyticsController::class, 'exportExcel'])->name('survey-analytics.export-excel');
 Route::get('survey-analytics/{id}/export-pdf', [App\Http\Controllers\SurveyAnalyticsController::class, 'exportPdf'])->name('survey-analytics.export-pdf');
+
+// Survey Management Routes
+Route::get('admin/resources/surveys/{record}/publish', [\App\Http\Controllers\SurveyManagementController::class, 'publish'])
+    ->middleware(['auth'])
+    ->name('filament.admin.resources.surveys.publish');
+Route::get('admin/resources/surveys/{record}/close', [\App\Http\Controllers\SurveyManagementController::class, 'close'])
+    ->middleware(['auth'])
+    ->name('filament.admin.resources.surveys.close');

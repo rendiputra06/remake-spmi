@@ -86,16 +86,7 @@
                                     <input type="date" name="answers[{{ $question->id }}]" value="{{ old("answers.{$question->id}") }}" class="form-control" @if($question->is_required) required @endif>
                                     @break
 
-                                    @case('select')
-                                    <select name="answers[{{ $question->id }}]" class="form-control" @if($question->is_required) required @endif>
-                                        <option value="">-- Pilih Jawaban --</option>
-                                        @foreach(json_decode($question->options) as $option)
-                                        <option value="{{ $option }}" {{ old("answers.{$question->id}") == $option ? 'selected' : '' }}>{{ $option }}</option>
-                                        @endforeach
-                                    </select>
-                                    @break
-
-                                    @case('radio')
+                                    @case('multiple_choice')
                                     @foreach(json_decode($question->options) as $option)
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="answers[{{ $question->id }}]" id="option{{ $question->id }}_{{ $loop->index }}" value="{{ $option }}" {{ old("answers.{$question->id}") == $option ? 'checked' : '' }} @if($question->is_required) required @endif>
@@ -117,15 +108,35 @@
                                     @endforeach
                                     @break
 
-                                    @case('rating')
-                                    <div class="btn-group" role="group">
-                                        @php
-                                        $max = $question->options ? intval($question->options) : 5;
-                                        @endphp
-                                        @for($i = 1; $i <= $max; $i++)
-                                            <input type="radio" class="btn-check" name="answers[{{ $question->id }}]" id="rating{{ $question->id }}_{{ $i }}" value="{{ $i }}" {{ old("answers.{$question->id}") == $i ? 'checked' : '' }} @if($question->is_required) required @endif>
-                                            <label class="btn btn-outline-primary" for="rating{{ $question->id }}_{{ $i }}">{{ $i }}</label>
-                                            @endfor
+                                    @case('dropdown')
+                                    <select name="answers[{{ $question->id }}]" class="form-select" @if($question->is_required) required @endif>
+                                        <option value="">-- Pilih Jawaban --</option>
+                                        @foreach(json_decode($question->options) as $option)
+                                        <option value="{{ $option }}" {{ old("answers.{$question->id}") == $option ? 'selected' : '' }}>{{ $option }}</option>
+                                        @endforeach
+                                    </select>
+                                    @break
+
+                                    @case('scale')
+                                    <div class="scale-container my-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">{{ $question->min_label ?: $question->min_value }}</span>
+                                            <span class="text-muted">{{ $question->max_label ?: $question->max_value }}</span>
+                                        </div>
+                                        <div class="range-container d-flex align-items-center gap-2">
+                                            <span>{{ $question->min_value }}</span>
+                                            <input type="range" class="form-range scale-input flex-grow-1" 
+                                                data-question-id="{{ $question->id }}"
+                                                name="answers[{{ $question->id }}]" 
+                                                min="{{ $question->min_value }}" 
+                                                max="{{ $question->max_value }}" 
+                                                value="{{ old("answers.{$question->id}", $question->min_value) }}"
+                                                @if($question->is_required) required @endif>
+                                            <span>{{ $question->max_value }}</span>
+                                        </div>
+                                        <div class="text-center mt-2">
+                                            <span class="selected-value badge bg-primary" id="value-display-{{ $question->id }}">{{ old("answers.{$question->id}", $question->min_value) }}</span>
+                                        </div>
                                     </div>
                                     @break
 
@@ -153,6 +164,21 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inisialisasi semua input range
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tangani input range untuk pertanyaan skala
+            document.querySelectorAll('.scale-input').forEach(function(rangeInput) {
+                const questionId = rangeInput.dataset.questionId;
+                const valueDisplay = document.getElementById('value-display-' + questionId);
+                
+                // Update nilai saat input berubah
+                rangeInput.addEventListener('input', function() {
+                    valueDisplay.textContent = this.value;
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

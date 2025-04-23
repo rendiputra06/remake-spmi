@@ -206,6 +206,13 @@ class SurveyResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\Action::make('analytics')
+                        ->label('Lihat Analitik')
+                        ->icon('heroicon-o-chart-bar')
+                        ->color('warning')
+                        ->url(fn(Survey $record) => route('survey-analytics.show', $record))
+                        ->openUrlInNewTab()
+                        ->visible(fn(Survey $record) => $record->responses()->exists()),
                     Tables\Actions\Action::make('download')
                         ->label('Download Hasil')
                         ->icon('heroicon-o-arrow-down-tray')
@@ -256,6 +263,84 @@ class SurveyResource extends Resource
                             ->color(fn(bool $state): string => $state ? 'info' : 'gray'),
                     ])
                     ->columns(2),
+
+                Infolists\Components\Section::make('Aksi Survei')
+                    ->schema([
+                        Infolists\Components\Grid::make(2)
+                            ->schema([
+                                // Tombol manajemen status
+                                Infolists\Components\Actions::make([
+                                    Infolists\Components\Actions\Action::make('publishSurvey')
+                                        ->label('Publikasikan Survei')
+                                        ->button()
+                                        ->color('success')
+                                        ->icon('heroicon-o-check-circle')
+                                        ->visible(fn($record) => $record->status === 'draft')
+                                        ->url(fn($record) => route('filament.admin.resources.surveys.publish', $record))
+                                        ->openUrlInNewTab(),
+
+                                    Infolists\Components\Actions\Action::make('closeSurvey')
+                                        ->label('Tutup Survei')
+                                        ->button()
+                                        ->color('danger')
+                                        ->icon('heroicon-o-x-circle')
+                                        ->visible(fn($record) => $record->status === 'active')
+                                        ->url(fn($record) => route('filament.admin.resources.surveys.close', $record))
+                                        ->openUrlInNewTab(),
+                                ])
+                                    ->visible(fn($record) => $record->status === 'draft' || $record->status === 'active')
+                                    ->columnSpan(1),
+
+                                // Tombol URL Publik
+                                Infolists\Components\Actions::make([
+                                    Infolists\Components\Actions\Action::make('publicUrl')
+                                        ->label('Buka URL Publik')
+                                        ->button()
+                                        ->color('primary')
+                                        ->icon('heroicon-o-link')
+                                        ->visible(fn($record) => $record->status === 'active' && $record->visibility === 'public')
+                                        ->url(fn($record) => route('surveys.show', $record))
+                                        ->openUrlInNewTab(),
+                                ])
+                                    ->visible(fn($record) => $record->status === 'active' && $record->visibility === 'public')
+                                    ->columnSpan(1),
+
+                                // Tombol analisis dan ekspor
+                                Infolists\Components\Actions::make([
+                                    Infolists\Components\Actions\Action::make('analytics')
+                                        ->label('Lihat Analisis Hasil')
+                                        ->button()
+                                        ->color('warning')
+                                        ->icon('heroicon-o-chart-bar')
+                                        ->url(fn($record) => route('survey-analytics.show', $record))
+                                        ->openUrlInNewTab(),
+                                ])
+                                    ->visible(fn($record) => $record->responses()->exists())
+                                    ->columnSpan(1),
+
+                                Infolists\Components\Actions::make([
+                                    Infolists\Components\Actions\Action::make('downloadExcel')
+                                        ->label('Download Excel')
+                                        ->button()
+                                        ->color('success')
+                                        ->icon('heroicon-o-arrow-down-tray')
+                                        ->url(fn($record) => route('survey-analytics.export-excel', $record))
+                                        ->openUrlInNewTab(),
+
+                                    Infolists\Components\Actions\Action::make('downloadPdf')
+                                        ->label('Download PDF')
+                                        ->button()
+                                        ->color('danger')
+                                        ->icon('heroicon-o-document-text')
+                                        ->url(fn($record) => route('survey-analytics.export-pdf', $record))
+                                        ->openUrlInNewTab(),
+                                ])
+                                    ->visible(fn($record) => $record->responses()->exists())
+                                    ->columnSpan(1),
+                            ]),
+                    ])
+                    ->visible(fn($record) => true)
+                    ->collapsible(),
 
                 Infolists\Components\Section::make('Waktu dan Target')
                     ->schema([

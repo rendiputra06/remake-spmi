@@ -91,7 +91,14 @@ class SurveyAnalyticsController extends Controller
             case 'text':
             case 'textarea':
                 $stats['type'] = 'text';
-                $stats['answers'] = $answers->pluck('answer')->toArray();
+                $stats['answers'] = $answers->map(function ($answer) {
+                    // Jika jawaban adalah type array, decode JSON
+                    if ($answer->answer_type === 'array') {
+                        $decoded = json_decode($answer->answer, true);
+                        return is_array($decoded) ? implode(', ', $decoded) : $answer->answer;
+                    }
+                    return $answer->answer;
+                })->toArray();
                 break;
 
             default:
@@ -110,7 +117,11 @@ class SurveyAnalyticsController extends Controller
         $counts = array_fill(0, $question->max_value - $question->min_value + 1, 0);
 
         foreach ($answers as $answer) {
-            $value = (int) $answer->answer;
+            // Konversi ke integer jika perlu
+            $value = $answer->answer_type === 'integer' ?
+                (int) $answer->answer :
+                (int) $answer->answer;
+
             if ($value >= $question->min_value && $value <= $question->max_value) {
                 $counts[$value - $question->min_value]++;
             }
@@ -127,9 +138,25 @@ class SurveyAnalyticsController extends Controller
         $counts = array_fill(0, count($options), 0);
 
         foreach ($answers as $answer) {
-            $optionIndex = array_search($answer->answer, $options);
-            if ($optionIndex !== false) {
-                $counts[$optionIndex]++;
+            // Gunakan typed_answer jika answer_type adalah 'array'
+            $answerValue = $answer->answer_type === 'array' ?
+                json_decode($answer->answer, true) :
+                $answer->answer;
+
+            if (is_array($answerValue)) {
+                // Jika jawaban adalah array, hitung setiap opsi yang dipilih
+                foreach ($answerValue as $selected) {
+                    $optionIndex = array_search($selected, $options);
+                    if ($optionIndex !== false) {
+                        $counts[$optionIndex]++;
+                    }
+                }
+            } else {
+                // Jika jawaban adalah string tunggal
+                $optionIndex = array_search($answerValue, $options);
+                if ($optionIndex !== false) {
+                    $counts[$optionIndex]++;
+                }
             }
         }
 
@@ -144,7 +171,10 @@ class SurveyAnalyticsController extends Controller
         $counts = array_fill(0, count($options), 0);
 
         foreach ($answers as $answer) {
-            $selectedOptions = json_decode($answer->answer, true);
+            $selectedOptions = $answer->answer_type === 'array' ?
+                json_decode($answer->answer, true) :
+                $answer->answer;
+
             if (is_array($selectedOptions)) {
                 foreach ($selectedOptions as $selected) {
                     $optionIndex = array_search($selected, $options);
@@ -203,10 +233,13 @@ class SurveyAnalyticsController extends Controller
                 if ($answer) {
                     $answerValue = $answer->answer;
 
-                    // Format jawaban sesuai tipe pertanyaan
-                    if (in_array($question->type, ['checkbox']) && $answerValue) {
+                    // Format jawaban sesuai tipe jawaban
+                    if ($answer->answer_type === 'array' && $answerValue) {
                         $options = json_decode($answerValue, true);
                         $answerValue = is_array($options) ? implode(', ', $options) : $answerValue;
+                    } else if ($answer->answer_type === 'integer' || $answer->answer_type === 'number') {
+                        // Pastikan angka ditampilkan dengan benar
+                        $answerValue = (int) $answerValue;
                     }
 
                     $sheet->setCellValue($col . $row, $answerValue);
