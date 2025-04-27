@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             DocumentSeeder::class,
             AuditSeeder::class,
             SurveySeeder::class,
+            AccreditationSeeder::class,
+            MonitoringSeeder::class,
         ]);
     }
 }

@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Survey;
 use App\Models\SurveyResponse;
 use App\Models\SurveyQuestion;
+use App\Models\SurveyAnswer;
+use App\Exports\SurveyExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SurveyController extends Controller
 {
@@ -142,5 +145,29 @@ class SurveyController extends Controller
         $survey = Survey::findOrFail($id);
 
         return view('surveys.thank-you', compact('survey'));
+    }
+
+    /**
+     * Export survey responses to Excel
+     */
+    public function exportExcel(Survey $survey)
+    {
+        // Periksa apakah survey valid
+        if (!$survey) {
+            return back()->with('error', 'Survei tidak ditemukan.');
+        }
+
+        // Cek apakah ada respons
+        $responseCount = SurveyResponse::where('survey_id', $survey->id)
+            ->where('is_completed', true)
+            ->count();
+
+        if ($responseCount === 0) {
+            return back()->with('error', 'Belum ada respons untuk survei ini.');
+        }
+
+        $fileName = 'survey-' . $survey->id . '-' . now()->format('YmdHis') . '.xlsx';
+
+        return Excel::download(new SurveyExport($survey), $fileName);
     }
 }

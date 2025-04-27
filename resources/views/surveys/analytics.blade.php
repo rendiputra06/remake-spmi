@@ -133,8 +133,16 @@
 
     <div class="container">
         <div class="survey-header">
-            <h1 class="mb-3">{{ $survey->title }}</h1>
-            <p class="lead">{{ $survey->description }}</p>
+            <h1>{{ $survey->title }}</h1>
+            <p class="text-muted">{{ $survey->description }}</p>
+            <div class="d-flex gap-2 mt-3">
+                <a href="{{ route('surveys.report', $survey) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-file-pdf"></i> Unduh Laporan PDF
+                </a>
+                <a href="{{ route('surveys.export-excel', $survey) }}" class="btn btn-sm btn-success">
+                    <i class="bi bi-file-excel"></i> Unduh Data Excel
+                </a>
+            </div>
             <div class="row mt-4">
                 <div class="col-md-6">
                     <p><strong>Status:</strong>

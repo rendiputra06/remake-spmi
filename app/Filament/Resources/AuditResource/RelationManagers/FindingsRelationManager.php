@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AuditResource\RelationManagers;
 
+use App\Models\AuditFinding;
 use App\Models\Standard;
 use App\Models\User;
 use Filament\Forms;
@@ -12,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class FindingsRelationManager extends RelationManager
 {
@@ -169,50 +171,65 @@ class FindingsRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-                Tables\Actions\Action::make('respond')
-                    ->label('Respon')
-                    ->icon('heroicon-o-chat-bubble-left')
-                    ->color('info')
+                Tables\Actions\Action::make('followup')
+                    ->label('Tindak Lanjut')
+                    ->icon('heroicon-o-clipboard-check')
+                    ->color('success')
+                    ->visible(fn(AuditFinding $record) => in_array($record->status, ['open', 'responded']) && is_null($record->followup_action))
                     ->form([
-                        Forms\Components\Textarea::make('response')
-                            ->label('Respon')
-                            ->required()
-                            ->rows(3),
-                        Forms\Components\Textarea::make('action_plan')
-                            ->label('Rencana Tindakan')
-                            ->required()
-                            ->rows(3),
+                        Forms\Components\Textarea::make('followup_action')
+                            ->label('Tindakan Perbaikan')
+                            ->required(),
+                        Forms\Components\DatePicker::make('followup_date')
+                            ->label('Tanggal Tindak Lanjut')
+                            ->default(now())
+                            ->required(),
                     ])
-                    ->action(function (array $data, $record) {
-                        $record->response = $data['response'];
-                        $record->action_plan = $data['action_plan'];
-                        $record->response_date = now();
-                        $record->responded_by = Auth::id();
-                        $record->status = 'responded';
-                        $record->save();
-                    })
-                    ->visible(fn($record) => $record->status === 'open'),
+                    ->action(function (AuditFinding $record, array $data): void {
+                        $record->update([
+                            'followup_action' => $data['followup_action'],
+                            'followup_date' => $data['followup_date'],
+                            'followup_by' => auth()->id(),
+                            'status' => 'in_progress',
+                        ]);
+                        Notification::make()
+                            ->title('Tindak lanjut berhasil dicatat')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('verify')
                     ->label('Verifikasi')
                     ->icon('heroicon-o-check-badge')
-                    ->color('success')
-                    ->action(function ($record) {
-                        $record->verified_by = Auth::id();
-                        $record->status = 'verified';
-                        $record->save();
-                    })
-                    ->requiresConfirmation()
-                    ->visible(fn($record) => in_array($record->status, ['responded', 'in_progress'])),
-                Tables\Actions\Action::make('close')
-                    ->label('Tutup')
-                    ->icon('heroicon-o-archive-box')
-                    ->color('gray')
-                    ->action(function ($record) {
-                        $record->status = 'closed';
-                        $record->save();
-                    })
-                    ->requiresConfirmation()
-                    ->visible(fn($record) => $record->status === 'verified'),
+                    ->color('primary')
+                    ->visible(fn(AuditFinding $record) => $record->status === 'in_progress' && !is_null($record->followup_action) && is_null($record->verification_notes))
+                    ->form([
+                        Forms\Components\Textarea::make('verification_notes')
+                            ->label('Catatan Verifikasi')
+                            ->required(),
+                        Forms\Components\DatePicker::make('verification_date')
+                            ->label('Tanggal Verifikasi')
+                            ->default(now())
+                            ->required(),
+                        Forms\Components\Select::make('new_status')
+                            ->label('Status Baru')
+                            ->options([
+                                'verified' => 'Terverifikasi',
+                                'closed' => 'Ditutup',
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (AuditFinding $record, array $data): void {
+                        $record->update([
+                            'verification_notes' => $data['verification_notes'],
+                            'verification_date' => $data['verification_date'],
+                            'verified_by' => auth()->id(),
+                            'status' => $data['new_status'],
+                        ]);
+                        Notification::make()
+                            ->title('Verifikasi berhasil dicatat')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

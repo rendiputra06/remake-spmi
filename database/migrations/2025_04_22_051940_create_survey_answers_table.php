@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('survey_response_id')->constrained()->onDelete('cascade');
             $table->foreignId('survey_question_id')->constrained()->onDelete('cascade');
-            $table->text('answer_text')->nullable(); // untuk jawaban teks
-            $table->integer('answer_number')->nullable(); // untuk jawaban numerik atau skala
-            $table->json('answer_options')->nullable(); // untuk jawaban multiple choice atau checkbox
+            $table->text('answer')->nullable(); // Kolom tunggal untuk menyimpan jawaban dalam bentuk teks
+            $table->string('answer_type')->nullable(); // Untuk menentukan tipe jawaban (text, number, array, dll)
+            $table->index('answer_type');
             $table->timestamps();
         });
     }

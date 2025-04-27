@@ -12,28 +12,29 @@ class AuditFinding extends Model
 
     protected $fillable = [
         'audit_id',
+        'description',
         'standard_id',
         'type',
-        'finding',
-        'evidence',
-        'recommendation',
-        'response',
-        'action_plan',
-        'response_date',
-        'target_completion_date',
         'status',
-        'created_by',
-        'responded_by',
+        'followup_action',
+        'followup_date',
+        'followup_by',
+        'verification_notes',
+        'verification_date',
         'verified_by',
+        'evidence',
+        'target_completion_date',
+        'created_by',
     ];
 
     protected $casts = [
-        'response_date' => 'date',
         'target_completion_date' => 'date',
+        'followup_date' => 'date',
+        'verification_date' => 'date',
     ];
 
     /**
-     * Get the audit that this finding belongs to.
+     * Get the audit that owns the finding.
      */
     public function audit(): BelongsTo
     {
@@ -41,7 +42,7 @@ class AuditFinding extends Model
     }
 
     /**
-     * Get the standard related to this finding.
+     * Get the standard associated with the finding.
      */
     public function standard(): BelongsTo
     {
@@ -57,42 +58,37 @@ class AuditFinding extends Model
     }
 
     /**
-     * Get the user who responded to this finding.
+     * Get the user who performed the followup action.
      */
-    public function responder(): BelongsTo
+    public function followupBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'responded_by');
+        return $this->belongsTo(User::class, 'followup_by');
     }
 
     /**
-     * Get the user who verified this finding.
+     * Get the user who verified the finding.
      */
-    public function verifier(): BelongsTo
+    public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
 
     /**
-     * Scope a query to only include open findings.
+     * Scope a query to only include findings that need followup.
      */
-    public function scopeOpen($query)
+    public function scopeNeedsFollowup($query)
     {
-        return $query->where('status', 'open');
+        return $query->whereIn('status', ['open', 'responded'])
+            ->whereNull('followup_action');
     }
 
     /**
-     * Scope a query to only include verified findings.
+     * Scope a query to only include findings that need verification.
      */
-    public function scopeVerified($query)
+    public function scopeNeedsVerification($query)
     {
-        return $query->where('status', 'verified');
-    }
-
-    /**
-     * Scope a query to only include closed findings.
-     */
-    public function scopeClosed($query)
-    {
-        return $query->where('status', 'closed');
+        return $query->where('status', 'in_progress')
+            ->whereNotNull('followup_action')
+            ->whereNull('verification_notes');
     }
 }

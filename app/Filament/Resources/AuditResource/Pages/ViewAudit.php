@@ -37,6 +37,15 @@ class ViewAudit extends ViewRecord
                     $this->notification()->success()->title('Audit selesai')->send();
                     $this->redirect($this->getResource()::getUrl('view', ['record' => $this->record]));
                 }),
+            Actions\Action::make('distribute_report')
+                ->label('Distribusi Laporan')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('info')
+                ->visible(fn() => $this->record->status === 'completed')
+                ->url(fn() => route('audits.distribute.form', $this->record))
+                ->openUrlInNewTab(),
+            Actions\Action::make('download_report')
+                ->label('Download PDF')
         ];
     }
 }

@@ -115,8 +115,8 @@ class AuditResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul')
-                    ->searchable()
-                    ->wrap(),
+                    // ->wrap()
+                    ->searchable(),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
@@ -142,13 +142,10 @@ class AuditResource extends Resource
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('faculty.name')
-                    ->label('Fakultas')
+                    ->label('Audite')
                     ->searchable()
-                    ->toggleable(),
-                Tables\Columns\TextColumn::make('department.name')
-                    ->label('Program Studi')
-                    ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->description(fn(Audit $record): string => $record->department->name ?? ''),
                 Tables\Columns\TextColumn::make('unit.name')
                     ->label('Unit')
                     ->searchable()

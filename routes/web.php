@@ -17,11 +17,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/login', function () {
+    redirect('/admin/login');
+})->name('login');
+
 // Routes untuk survei publik
 Route::get('/surveys', [App\Http\Controllers\SurveyController::class, 'index'])->name('surveys.index');
-Route::get('/surveys/{id}', [App\Http\Controllers\SurveyController::class, 'show'])->name('surveys.show');
-Route::post('/surveys/{id}/submit', [App\Http\Controllers\SurveyController::class, 'submit'])->name('surveys.submit');
-Route::get('/surveys/{id}/thank-you', [App\Http\Controllers\SurveyController::class, 'thankYou'])->name('surveys.thank-you');
+Route::get('/surveys/{survey}', [App\Http\Controllers\SurveyController::class, 'show'])->name('surveys.show');
+Route::post('/surveys/{survey}/submit', [App\Http\Controllers\SurveyController::class, 'submit'])->name('surveys.submit');
+Route::get('/surveys/{survey}/thankyou', [App\Http\Controllers\SurveyController::class, 'thankYou'])->name('surveys.thank-you');
+Route::get('/surveys/{survey}/report', [App\Http\Controllers\SurveyController::class, 'report'])->name('surveys.report');
+Route::get('/surveys/{survey}/analytics', [App\Http\Controllers\SurveyAnalyticsController::class, 'show'])->name('surveys.analytics');
+Route::get('/surveys/{survey}/export-excel', [App\Http\Controllers\SurveyController::class, 'exportExcel'])->name('surveys.export-excel');
 
 // Survey Analytics Routes
 Route::get('survey-analytics/{id}', [App\Http\Controllers\SurveyAnalyticsController::class, 'show'])->name('survey-analytics.show');
@@ -35,3 +42,8 @@ Route::get('admin/resources/surveys/{record}/publish', [\App\Http\Controllers\Su
 Route::get('admin/resources/surveys/{record}/close', [\App\Http\Controllers\SurveyManagementController::class, 'close'])
     ->middleware(['auth'])
     ->name('filament.admin.resources.surveys.close');
+
+// Routes for Audit Report Distribution
+Route::get('audits/{audit}/distribute', [App\Http\Controllers\AuditReportController::class, 'showDistributionForm'])->name('audits.distribute.form');
+Route::post('audits/{audit}/distribute', [App\Http\Controllers\AuditReportController::class, 'distribute'])->name('audits.distribute');
+Route::get('audits/{audit}/report-pdf', [App\Http\Controllers\AuditReportController::class, 'generatePDF'])->name('audits.report.pdf');
