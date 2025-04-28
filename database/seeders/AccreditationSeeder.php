@@ -2,16 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Accreditation;
-use App\Models\AccreditationStandard;
-use App\Models\AccreditationDocument;
-use App\Models\AccreditationEvaluation;
-use App\Models\Department;
-use App\Models\Document;
-use App\Models\Faculty;
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class AccreditationSeeder extends Seeder
 {
@@ -20,158 +15,339 @@ class AccreditationSeeder extends Seeder
      */
     public function run(): void
     {
-        // Dapatkan superadmin
-        $superAdmin = User::whereHas('roles', function ($query) {
-            $query->where('name', 'super-admin');
-        })->first();
-
-        // Dapatkan coordinator (kepala-lpm)
-        $coordinator = User::whereHas('roles', function ($query) {
-            $query->where('name', 'kepala-lpm');
-        })->first();
-
-        // Dapatkan faculty dan department
-        $ftik = Faculty::where('code', 'FTIK')->first();
-        $ti = Department::where('code', 'TI')->first();
-
-        // Membuat contoh akreditasi program studi
-        $accreditation = Accreditation::create([
-            'title' => 'Akreditasi Program Studi Teknik Informatika 2023',
-            'description' => 'Akreditasi Program Studi Teknik Informatika periode 2023-2028',
-            'type' => 'department',
-            'institution_name' => 'BAN-PT',
-            'status' => 'in_progress',
-            'grade' => null,
-            'submission_date' => now()->addMonths(2),
-            'visit_date' => now()->addMonths(3),
-            'result_date' => null,
-            'expiry_date' => now()->addYears(5),
-            'faculty_id' => $ftik?->id,
-            'department_id' => $ti?->id,
-            'coordinator_id' => $coordinator?->id,
-            'created_by' => $superAdmin?->id,
-            'updated_by' => $superAdmin?->id,
-        ]);
-
-        // Membuat standar akreditasi
-        $standards = [
+        // Seed accreditations
+        $accreditations = [
             [
-                'code' => 'STD-01',
-                'name' => 'Visi, Misi, Tujuan dan Strategi',
-                'description' => 'Penilaian terhadap kesesuaian visi, misi, tujuan dan strategi program studi',
-                'weight' => 3.0,
-                'score' => null,
-                'target_score' => 3.5,
+                'id' => 1,
+                'title' => 'Akreditasi Program Studi Informatika',
+                'description' => 'Akreditasi untuk Program Studi Informatika oleh BAN-PT',
+                'type' => 'department',
+                'institution_name' => 'BAN-PT',
+                'grade' => 'Unggul',
+                'status' => 'completed',
+                'submission_date' => Carbon::now()->subYears(4),
+                'visit_date' => Carbon::now()->subYears(4)->addMonths(2),
+                'result_date' => Carbon::now()->subYears(4)->addMonths(4),
+                'expiry_date' => Carbon::now()->addYear(),
+                'period_start' => Carbon::now()->subYears(4),
+                'period_end' => Carbon::now()->addYear(),
+                'faculty_id' => 1,
+                'department_id' => 1,
+                'coordinator_id' => 3,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
             ],
             [
-                'code' => 'STD-02',
-                'name' => 'Tata Pamong, Tata Kelola dan Kerjasama',
-                'description' => 'Penilaian terhadap sistem tata pamong, tata kelola dan kerjasama program studi',
-                'weight' => 4.0,
-                'score' => null,
-                'target_score' => 3.5,
-            ],
-            [
-                'code' => 'STD-03',
-                'name' => 'Mahasiswa',
-                'description' => 'Penilaian terhadap kualitas input, proses dan output mahasiswa program studi',
-                'weight' => 4.0,
-                'score' => null,
-                'target_score' => 3.5,
-            ],
-            [
-                'code' => 'STD-04',
-                'name' => 'Sumber Daya Manusia',
-                'description' => 'Penilaian terhadap kualitas dan kuantitas sumber daya manusia program studi',
-                'weight' => 4.0,
-                'score' => null,
-                'target_score' => 4.0,
-            ],
-            [
-                'code' => 'STD-05',
-                'name' => 'Keuangan, Sarana dan Prasarana',
-                'description' => 'Penilaian terhadap keuangan, sarana dan prasarana program studi',
-                'weight' => 3.0,
-                'score' => null,
-                'target_score' => 3.0,
-            ],
-            [
-                'code' => 'STD-06',
-                'name' => 'Pendidikan',
-                'description' => 'Penilaian terhadap proses pendidikan program studi',
-                'weight' => 5.0,
-                'score' => null,
-                'target_score' => 4.0,
-            ],
-            [
-                'code' => 'STD-07',
-                'name' => 'Penelitian',
-                'description' => 'Penilaian terhadap proses dan hasil penelitian program studi',
-                'weight' => 4.0,
-                'score' => null,
-                'target_score' => 3.5,
-            ],
-            [
-                'code' => 'STD-08',
-                'name' => 'Pengabdian kepada Masyarakat',
-                'description' => 'Penilaian terhadap proses dan hasil pengabdian kepada masyarakat program studi',
-                'weight' => 3.0,
-                'score' => null,
-                'target_score' => 3.0,
-            ],
-            [
-                'code' => 'STD-09',
-                'name' => 'Luaran dan Capaian Tridharma',
-                'description' => 'Penilaian terhadap luaran dan capaian tridharma program studi',
-                'weight' => 5.0,
-                'score' => null,
-                'target_score' => 4.0,
+                'id' => 2,
+                'title' => 'Akreditasi Internasional Program Studi Informatika',
+                'description' => 'Akreditasi Internasional untuk Program Studi Informatika',
+                'type' => 'department',
+                'institution_name' => 'ABET',
+                'grade' => 'A',
+                'status' => 'in_progress',
+                'submission_date' => Carbon::now()->subMonth(),
+                'visit_date' => Carbon::now()->addMonth(),
+                'result_date' => null,
+                'expiry_date' => null,
+                'period_start' => Carbon::now()->subMonth(),
+                'period_end' => Carbon::now()->addMonths(6),
+                'faculty_id' => 1,
+                'department_id' => 1,
+                'coordinator_id' => 3,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subMonth(),
+                'updated_at' => Carbon::now()->subMonth(),
             ],
         ];
 
-        foreach ($standards as $standard) {
-            AccreditationStandard::create([
-                'accreditation_id' => $accreditation->id,
-                'code' => $standard['code'],
-                'name' => $standard['name'],
-                'description' => $standard['description'],
-                'weight' => $standard['weight'],
-                'score' => $standard['score'],
-                'target_score' => $standard['target_score'],
-            ]);
-        }
+        DB::table('accreditations')->insert($accreditations);
 
-        // Ambil dokumen untuk dilampirkan ke akreditasi
-        $documents = Document::take(3)->get();
-        $standardIds = AccreditationStandard::where('accreditation_id', $accreditation->id)
-            ->pluck('id')
-            ->toArray();
+        // Seed accreditation standards
+        $standards = [
+            [
+                'id' => 1,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C1',
+                'name' => 'Visi, Misi, Tujuan dan Strategi',
+                'description' => 'Standar terkait visi, misi, tujuan, dan strategi',
+                'category' => 'academic',
+                'weight' => 3.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 1,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 2,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C2',
+                'name' => 'Tata Pamong, Tata Kelola, dan Kerjasama',
+                'description' => 'Standar terkait tata pamong, kepemimpinan, dan sistem pengelolaan',
+                'category' => 'management',
+                'weight' => 3.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 2,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 3,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C3',
+                'name' => 'Mahasiswa',
+                'description' => 'Standar terkait mahasiswa',
+                'category' => 'academic',
+                'weight' => 3.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 3,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 4,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C4',
+                'name' => 'Sumber Daya Manusia',
+                'description' => 'Standar terkait sumber daya manusia',
+                'category' => 'organization',
+                'weight' => 4.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 4,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 5,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C5',
+                'name' => 'Keuangan, Sarana dan Prasarana',
+                'description' => 'Standar terkait keuangan, sarana dan prasarana',
+                'category' => 'facilities',
+                'weight' => 4.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 5,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 6,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C6',
+                'name' => 'Pendidikan',
+                'description' => 'Standar terkait pendidikan',
+                'category' => 'academic',
+                'weight' => 5.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 6,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 7,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C7',
+                'name' => 'Penelitian',
+                'description' => 'Standar terkait penelitian',
+                'category' => 'research',
+                'weight' => 5.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 7,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 8,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C8',
+                'name' => 'Pengabdian kepada Masyarakat',
+                'description' => 'Standar terkait pengabdian kepada masyarakat',
+                'category' => 'community_service',
+                'weight' => 5.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 8,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 9,
+                'accreditation_id' => 1,
+                'parent_id' => null,
+                'code' => 'C9',
+                'name' => 'Luaran dan Capaian Tridharma',
+                'description' => 'Standar terkait luaran dan capaian tridharma',
+                'category' => 'academic',
+                'weight' => 6.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 9,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            // Sub-standards for C1
+            [
+                'id' => 10,
+                'accreditation_id' => 1,
+                'parent_id' => 1,
+                'code' => '1.1',
+                'name' => 'Kesesuaian Visi, Misi, Tujuan dan Strategi (VMTS)',
+                'description' => 'Kesesuaian VMTS dengan perkembangan ilmu pengetahuan dan profesi',
+                'category' => 'academic',
+                'weight' => 1.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 1,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 11,
+                'accreditation_id' => 1,
+                'parent_id' => 1,
+                'code' => '1.2',
+                'name' => 'Mekanisme Penyusunan VMTS',
+                'description' => 'Mekanisme penyusunan VMTS yang melibatkan pemangku kepentingan',
+                'category' => 'academic',
+                'weight' => 1.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 2,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 12,
+                'accreditation_id' => 1,
+                'parent_id' => 1,
+                'code' => '1.3',
+                'name' => 'Sosialisasi VMTS',
+                'description' => 'Sosialisasi VMTS kepada pemangku kepentingan',
+                'category' => 'academic',
+                'weight' => 1.0,
+                'max_score' => 100.0,
+                'is_active' => true,
+                'order' => 3,
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+        ];
 
-        if ($documents->count() > 0 && count($standardIds) > 0) {
-            foreach ($documents as $index => $document) {
-                AccreditationDocument::create([
-                    'accreditation_id' => $accreditation->id,
-                    'accreditation_standard_id' => $standardIds[$index % count($standardIds)],
-                    'document_id' => $document->id,
-                    'status' => 'submitted',
-                    'notes' => null,
-                    'reviewer_id' => null,
-                    'reviewed_at' => null,
-                ]);
-            }
-        }
+        DB::table('accreditation_standards')->insert($standards);
 
-        // Membuat evaluasi akreditasi
-        AccreditationEvaluation::create([
-            'accreditation_id' => $accreditation->id,
-            'name' => 'Evaluasi Internal Program Studi',
-            'description' => 'Evaluasi internal sebagai persiapan akreditasi',
-            'overall_score' => null,
-            'strengths' => 'Kualitas lulusan yang baik, kolaborasi dengan industri yang kuat',
-            'weaknesses' => 'Publikasi internasional belum optimal, fasilitas laboratorium perlu ditingkatkan',
-            'recommendations' => 'Perlu meningkatkan jumlah publikasi internasional dosen dan mahasiswa',
-            'created_by' => $coordinator?->id,
-            'updated_by' => null,
-        ]);
+        // Seed accreditation documents
+        $documents = [
+            [
+                'id' => 1,
+                'accreditation_id' => 1,
+                'standard_id' => 1,
+                'title' => 'Dokumen Visi Misi Prodi Informatika',
+                'description' => 'Dokumen visi dan misi program studi informatika',
+                'document_number' => 'VM-INF-001',
+                'document_type' => 'policy',
+                'file_path' => 'documents/vmts-prodi-informatika.pdf',
+                'status' => 'approved',
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+            [
+                'id' => 2,
+                'accreditation_id' => 1,
+                'standard_id' => 2,
+                'title' => 'Manual Mutu Tata Pamong',
+                'description' => 'Manual mutu terkait tata pamong dan kepemimpinan',
+                'document_number' => 'MM-TP-001',
+                'document_type' => 'manual',
+                'file_path' => 'documents/manual-mutu-tata-pamong.pdf',
+                'status' => 'approved',
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(4),
+                'updated_at' => Carbon::now()->subYears(4),
+            ],
+        ];
+
+        DB::table('accreditation_documents')->insert($documents);
+
+        // Seed accreditation evaluations
+        $evaluations = [
+            [
+                'id' => 1,
+                'accreditation_id' => 1,
+                'standard_id' => 1,
+                'title' => 'Evaluasi Standar VMTS',
+                'description' => 'Evaluasi capaian standar Visi, Misi, Tujuan, dan Strategi',
+                'evaluation_date' => Carbon::now()->subYears(3),
+                'status' => 'completed',
+                'score' => 85.5,
+                'findings' => 'Visi dan misi sudah jelas dan terukur, namun sosialisasi masih perlu ditingkatkan.',
+                'recommendations' => 'Meningkatkan sosialisasi VMTS kepada seluruh pemangku kepentingan.',
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(3),
+                'updated_at' => Carbon::now()->subYears(3),
+            ],
+            [
+                'id' => 2,
+                'accreditation_id' => 1,
+                'standard_id' => 4,
+                'title' => 'Evaluasi Standar SDM',
+                'description' => 'Evaluasi capaian standar Sumber Daya Manusia',
+                'evaluation_date' => Carbon::now()->subYears(3),
+                'status' => 'completed',
+                'score' => 82.0,
+                'findings' => 'Kualifikasi dosen sudah baik, namun jumlah masih kurang memadai.',
+                'recommendations' => 'Merekrut dosen baru dengan kualifikasi yang sesuai kebutuhan program studi.',
+                'created_by' => 1,
+                'updated_by' => 1,
+                'created_at' => Carbon::now()->subYears(3),
+                'updated_at' => Carbon::now()->subYears(3),
+            ],
+        ];
+
+        DB::table('accreditation_evaluations')->insert($evaluations);
     }
 }

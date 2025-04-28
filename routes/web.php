@@ -17,9 +17,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/login', function () {
-    redirect('/admin/login');
-})->name('login');
+Route::redirect('/login', '/admin/login')->name('login');
 
 // Routes untuk survei publik
 Route::get('/surveys', [App\Http\Controllers\SurveyController::class, 'index'])->name('surveys.index');

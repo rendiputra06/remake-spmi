@@ -15,14 +15,16 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->enum('type', ['institution', 'faculty', 'department', 'program']);
-            $table->string('institution_name')->nullable(); // Nama lembaga akreditasi
-            $table->string('status')->nullable(); // Status akreditasi (draft, in_progress, submitted, completed)
-            $table->string('grade')->nullable(); // Nilai akreditasi (A, B, C, dll)
+            $table->string('type'); // institution, faculty, department, program
+            $table->string('institution_name')->nullable();
+            $table->string('grade')->nullable();
+            $table->string('status')->default('draft'); // draft, in_progress, submitted, completed
             $table->date('submission_date')->nullable();
             $table->date('visit_date')->nullable();
             $table->date('result_date')->nullable();
             $table->date('expiry_date')->nullable();
+            $table->date('period_start')->nullable();
+            $table->date('period_end')->nullable();
             $table->foreignId('faculty_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('department_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('coordinator_id')->nullable()->constrained('users')->onDelete('set null');
@@ -34,35 +36,47 @@ return new class extends Migration
         Schema::create('accreditation_standards', function (Blueprint $table) {
             $table->id();
             $table->foreignId('accreditation_id')->constrained()->onDelete('cascade');
+            $table->foreignId('parent_id')->nullable()->constrained('accreditation_standards')->onDelete('cascade');
             $table->string('code');
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('weight', 5, 2)->default(1); // Bobot standar
-            $table->decimal('score', 5, 2)->nullable(); // Nilai saat ini
-            $table->decimal('target_score', 5, 2)->nullable(); // Nilai target
+            $table->string('category')->nullable();
+            $table->decimal('weight', 5, 2)->default(1.00);
+            $table->decimal('max_score', 5, 2)->default(100.00);
+            $table->boolean('is_active')->default(true);
+            $table->integer('order')->default(0);
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
 
         Schema::create('accreditation_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('accreditation_id')->constrained()->onDelete('cascade');
-            $table->foreignId('accreditation_standard_id')->nullable()->constrained()->onDelete('cascade');
-            $table->foreignId('document_id')->constrained()->onDelete('cascade');
-            $table->string('status')->default('submitted'); // submitted, reviewed, approved, rejected
-            $table->text('notes')->nullable();
-            $table->foreignId('reviewer_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->timestamp('reviewed_at')->nullable();
+            $table->foreignId('standard_id')->nullable()->constrained('accreditation_standards')->onDelete('cascade');
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->string('document_number')->nullable();
+            $table->string('document_type');
+            $table->string('file_path')->nullable();
+            $table->date('issue_date')->nullable();
+            $table->date('valid_until')->nullable();
+            $table->string('status')->default('draft'); // draft, review, approved, rejected, expired, archived
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
 
         Schema::create('accreditation_evaluations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('accreditation_id')->constrained()->onDelete('cascade');
-            $table->string('name');
+            $table->foreignId('standard_id')->nullable()->constrained('accreditation_standards')->onDelete('cascade');
+            $table->string('title');
             $table->text('description')->nullable();
-            $table->decimal('overall_score', 5, 2)->nullable();
-            $table->text('strengths')->nullable();
-            $table->text('weaknesses')->nullable();
+            $table->date('evaluation_date');
+            $table->string('status')->default('draft'); // draft, in_progress, completed, reviewed
+            $table->decimal('score', 5, 2)->nullable();
+            $table->text('findings')->nullable();
             $table->text('recommendations')->nullable();
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
